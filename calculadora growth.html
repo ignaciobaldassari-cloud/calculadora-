@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growth Dental Systems — Calculadora ROI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f1efea;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --text: #1a1a18;
+    --muted: #6b6a65;
+    --hint: #9e9d98;
+    --green: #1D9E75;
+    --green-bg: #E1F5EE;
+    --green-text: #085041;
+    --purple: #7F77DD;
+    --purple-bg: #EEEDFE;
+    --purple-text: #3C3489;
+    --blue: #378ADD;
+    --red: #E24B4A;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--green); flex-shrink: 0;
+  }
+  header h1 { font-size: 15px; font-weight: 500; color: var(--text); }
+  header span { font-size: 13px; color: var(--muted); margin-left: 4px; }
+  .container { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 5px; width: fit-content;
+  }
+  .tab-btn {
+    padding: 7px 16px; border: none; border-radius: var(--radius-sm);
+    background: transparent; color: var(--muted); font-size: 13px;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400;
+    transition: all .15s;
+  }
+  .tab-btn.active {
+    background: var(--bg); color: var(--text); font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 22px; margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 10px; font-weight: 500; color: var(--hint);
+    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px;
+  }
+  .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 12px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; color: var(--muted); }
+  .field input[type=number] {
+    padding: 9px 11px; border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500; background: var(--surface); color: var(--text);
+    font-family: 'DM Mono', monospace; transition: border .15s;
+  }
+  .field input[type=number]:focus { outline: none; border-color: var(--green); }
+  .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .slider-row label { font-size: 12px; color: var(--muted); width: 170px; flex-shrink: 0; }
+  .slider-row input[type=range] {
+    flex: 1; height: 4px; accent-color: var(--green);
+    cursor: pointer;
+  }
+  .slider-val {
+    font-size: 13px; font-weight: 500; color: var(--text);
+    min-width: 40px; text-align: right; font-family: 'DM Mono', monospace;
+  }
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+  .metric { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px; }
+  .metric .m-lbl { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  .metric .m-val { font-size: 20px; font-weight: 500; color: var(--text); line-height: 1.1; font-family: 'DM Mono', monospace; }
+  .metric .m-sub { font-size: 11px; color: var(--hint); margin-top: 3px; }
+  .metric.green .m-val { color: var(--green); }
+  .metric.purple .m-val { color: var(--purple); }
+  .funnel { display: flex; align-items: center; overflow-x: auto; padding-bottom: 4px; }
+  .f-step { flex: 1; min-width: 80px; display: flex; align-items: center; }
+  .f-box {
+    flex: 1; text-align: center; padding: 10px 6px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+  .f-num { font-size: 18px; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .f-lbl { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .f-arr { width: 28px; flex-shrink: 0; text-align: center; }
+  .f-pct { font-size: 10px; color: var(--hint); display: block; }
+  .f-sym { color: var(--border2); font-size: 14px; }
+  .tx-list { display: flex; flex-direction: column; gap: 10px; }
+  .tx-item { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; background: var(--surface); }
+  .tx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .tx-name {
+    font-size: 14px; font-weight: 500; color: var(--text);
+    border: none; outline: none; background: transparent;
+    font-family: 'DM Sans', sans-serif; border-bottom: 1px dashed var(--border2);
+    padding-bottom: 2px;
+  }
+  .tx-del {
+    font-size: 12px; color: var(--muted); cursor: pointer;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 4px 10px; background: transparent; font-family: 'DM Sans', sans-serif;
+    transition: all .15s;
+  }
+  .tx-del:hover { color: var(--red); border-color: var(--red); }
+  .tx-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 8px; }
+  .tx-result {
+    display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px;
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .tx-res-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .tx-res-item .rl { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+  .tx-res-item .rv { font-size: 16px; font-weight: 500; color: var(--text); font-family: 'DM Mono', monospace; }
+  .tx-res-item.green .rv { color: var(--green); }
+  .btn-add {
+    padding: 10px 16px; border: 1px dashed var(--border2);
+    border-radius: var(--radius-sm); background: transparent;
+    color: var(--muted); font-size: 13px; cursor: pointer; width: 100%;
+    margin-top: 6px; font-family: 'DM Sans', sans-serif; transition: all .15s;
+  }
+  .btn-add:hover { color: var(--text); border-color: var(--text); }
+  .combined-bar { display: flex; border-radius: 4px; overflow: hidden; height: 8px; margin: 10px 0 6px; }
+  .combined-seg { height: 100%; transition: width .3s; }
+  .proj-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .proj-table th {
+    text-align: left; font-size: 10px; font-weight: 500; color: var(--muted);
+    padding: 7px 10px; border-bottom: 1px solid var(--border);
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .proj-table td {
+    padding: 10px 10px; border-bottom: 1px solid var(--border);
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px;
+  }
+  .proj-table tbody tr:last-child td { border-bottom: none; font-weight: 500; background: var(--surface2); }
+  .proj-table .pos { color: var(--green); }
+  .proj-table .neg { color: var(--red); }
+  .proj-table td:first-child { font-family: 'DM Sans', sans-serif; }
+  .mode-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
+  .mode-btn {
+    padding: 6px 14px; border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    background: transparent; color: var(--muted); font-size: 12px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all .15s;
+  }
+  .mode-btn.active { background: var(--surface2); color: var(--text); font-weight: 500; }
+  .inv-result { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 14px; }
+  .inv-res { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; }
+  .inv-res .il { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .inv-res .iv { font-size: 18px; font-weight: 500; color: var(--text); font-family: 'DM Mono', monospace; }
+  .inv-res.green .iv { color: var(--green); }
+  .inv-res.purple .iv { color: var(--purple); }
+  #proj-chart-wrap { position: relative; width: 100%; height: 220px; }
+  .months-btns { display: flex; gap: 6px; margin-top: 8px; }
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  @media (max-width: 600px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .inv-result { grid-template-columns: repeat(2, 1fr); }
+    header { padding: 14px 16px; }
+    .container { padding: 18px 14px 50px; }
+    .slider-row label { width: 130px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>Growth Dental Systems <span>— calculadora ROI de campaña</span></h1>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="setTab('calc')">Calculadora</button>
+    <button class="tab-btn" onclick="setTab('tratamientos')">Tratamientos</button>
+    <button class="tab-btn" onclick="setTab('proyeccion')">Proyección mensual</button>
+    <button class="tab-btn" onclick="setTab('inverso')">Objetivo inverso</button>
+  </div>
+
+  <!-- CALCULADORA -->
+  <div id="tab-calc">
+    <div class="card">
+      <div class="card-title">Parámetros de campaña</div>
+      <div class="field-grid">
+        <div class="field"><label>Inversión en ads (USD)</label><input type="number" id="c-inv" value="1000" min="0" oninput="calcMain()"></div>
+        <div class="field"><label>CPL — costo por lead (USD)</label><input type="number" id="c-cpl" value="8" min="0.1" step="0.5" oninput="calcMain()"></div>
+        <div class="field"><label>Precio del tratamiento (USD)</label><input type="number" id="c-precio" value="500" min="0" oninput="calcMain()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tasas de conversión</div>
+      <div class="slider-row"><label>Lead → Agenda</label><input type="range" id="c-ta" min="1" max="100" value="40" step="1" oninput="calcMain()"><span class="slider-val" id="lc-ta">40%</span></div>
+      <div class="slider-row"><label>Agenda → Se presenta</label><input type="range" id="c-tp" min="1" max="100" value="70" step="1" oninput="calcMain()"><span class="slider-val" id="lc-tp">70%</span></div>
+      <div class="slider-row"><label>Presentado → Venta</label><input type="range" id="c-tv" min="1" max="100" value="50" step="1" oninput="calcMain()"><span class="slider-val" id="lc-tv">50%</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Embudo de conversión</div>
+      <div class="funnel" id="main-funnel"></div>
+    </div>
+    <div class="metrics-grid" id="main-metrics"></div>
+  </div>
+
+  <!-- TRATAMIENTOS -->
+  <div id="tab-tratamientos" style="display:none">
+    <div id="tx-list" class="tx-list"></div>
+    <button class="btn-add" onclick="addTx()">+ Agregar tratamiento</button>
+    <div id="tx-combined" style="margin-top:14px;display:none"></div>
+  </div>
+
+  <!-- PROYECCIÓN -->
+  <div id="tab-proyeccion" style="display:none">
+    <div class="card">
+      <div class="card-title">Configuración de proyección</div>
+      <div class="field-grid">
+        <div class="field"><label>Inversión mes 1 (USD)</label><input type="number" id="p-inv" value="1000" min="0" oninput="renderProj()"></div>
+        <div class="field"><label>Crecimiento mensual (%)</label><input type="number" id="p-crec" value="20" min="0" max="200" oninput="renderProj()"></div>
+        <div class="field"><label>CPL (USD)</label><input type="number" id="p-cpl" value="8" min="0.1" step="0.5" oninput="renderProj()"></div>
+        <div class="field"><label>Precio del tratamiento (USD)</label><input type="number" id="p-precio" value="500" min="0" oninput="renderProj()"></div>
+      </div>
+      <div class="slider-row"><label>Lead → Agenda</label><input type="range" id="p-ta" min="1" max="100" value="40" step="1" oninput="renderProj()"><span class="slider-val" id="lp-ta">40%</span></div>
+      <div class="slider-row"><label>Agenda → Se presenta</label><input type="range" id="p-tp" min="1" max="100" value="70" step="1" oninput="renderProj()"><span class="slider-val" id="lp-tp">70%</span></div>
+      <div class="slider-row"><label>Presentado → Venta</label><input type="range" id="p-tv" min="1" max="100" value="50" step="1" oninput="renderProj()"><span class="slider-val" id="lp-tv">50%</span></div>
+      <div style="margin-top:10px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Meses a proyectar</div>
+        <div class="months-btns" id="months-btns">
+          <button class="mode-btn active" onclick="setMonths(3,this)">3 meses</button>
+          <button class="mode-btn" onclick="setMonths(6,this)">6 meses</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="legend-row" id="proj-legend"></div>
+      <div id="proj-chart-wrap"><canvas id="proj-chart"></canvas></div>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <table class="proj-table" id="proj-table"></table>
+    </div>
+  </div>
+
+  <!-- OBJETIVO INVERSO -->
+  <div id="tab-inverso" style="display:none">
+    <div class="card">
+      <div class="card-title">¿Cuánto necesito invertir para llegar a mi objetivo?</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="inv-mode-v" onclick="setInvMode('ventas')">Quiero X ventas</button>
+        <button class="mode-btn" id="inv-mode-i" onclick="setInvMode('ingresos')">Quiero X ingresos</button>
+      </div>
+      <div class="field-grid">
+        <div class="field" id="inv-field-ventas"><label>Ventas deseadas</label><input type="number" id="i-ventas" value="10" min="1" oninput="calcInv()"></div>
+        <div class="field" id="inv-field-ingresos" style="display:none"><label>Ingresos deseados (USD)</label><input type="number" id="i-ingresos" value="5000" min="1" oninput="calcInv()"></div>
+        <div class="field"><label>CPL (USD)</label><input type="number" id="i-cpl" value="8" min="0.1" step="0.5" oninput="calcInv()"></div>
+        <div class="field"><label>Precio del tratamiento (USD)</label><input type="number" id="i-precio" value="500" min="0" oninput="calcInv()"></div>
+      </div>
+      <div class="slider-row"><label>Lead → Agenda</label><input type="range" id="i-ta" min="1" max="100" value="40" step="1" oninput="calcInv()"><span class="slider-val" id="li-ta">40%</span></div>
+      <div class="slider-row"><label>Agenda → Se presenta</label><input type="range" id="i-tp" min="1" max="100" value="70" step="1" oninput="calcInv()"><span class="slider-val" id="li-tp">70%</span></div>
+      <div class="slider-row"><label>Presentado → Venta</label><input type="range" id="i-tv" min="1" max="100" value="50" step="1" oninput="calcInv()"><span class="slider-val" id="li-tv">50%</span></div>
+    </div>
+    <div class="inv-result" id="inv-result"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let treatments=[
+  {id:1,name:'Carillas de resina',inv:1500,cpl:8,precio:2400,ta:30,tp:65,tv:35},
+  {id:2,name:'Valoración dental',inv:500,cpl:5,precio:150,ta:50,tp:75,tv:65}
+];
+let txId=3,projMonths=3,invMode='ventas',projChartInst=null;
+const COLORS=['#7F77DD','#1D9E75','#378ADD','#D85A30','#BA7517'];
+
+function fmt(n){return Math.round(n).toLocaleString('es-MX')}
+function fmtUSD(n){return '$'+fmt(n)}
+function sv(id){return parseFloat(document.getElementById(id).value)||0}
+function si(id){return parseInt(document.getElementById(id).value)||0}
+function slv(rid,lid){const v=document.getElementById(rid).value;document.getElementById(lid).textContent=v+'%';return parseInt(v)}
+
+function calcR(inv,cpl,ta,tp,tv,precio){
+  const leads=cpl>0?Math.round(inv/cpl):0;
+  const agendas=Math.round(leads*ta/100);
+  const pres=Math.round(agendas*tp/100);
+  const ventas=Math.round(pres*tv/100);
+  const ingresos=ventas*precio;
+  const ganancia=ingresos-inv;
+  const roi=inv>0?Math.round(ganancia/inv*100):0;
+  const cpv=ventas>0?Math.round(inv/ventas):0;
+  return{leads,agendas,pres,ventas,ingresos,ganancia,roi,cpv};
+}
+
+function calcRT(t){return calcR(t.inv,t.cpl,t.ta,t.tp,t.tv,t.precio);}
+
+function renderFunnel(cid,r,ta,tp,tv){
+  const steps=[
+    {num:fmt(r.leads),lbl:'Leads',color:'#7F77DD'},
+    {num:fmt(r.agendas),lbl:'Agendas',color:'#378ADD',pct:ta+'%'},
+    {num:fmt(r.pres),lbl:'Presentados',color:'#1D9E75',pct:tp+'%'},
+    {num:fmt(r.ventas),lbl:'Ventas',color:'#639922',pct:tv+'%'},
+  ];
+  document.getElementById(cid).innerHTML=steps.map((s,i)=>{
+    const arr=i<steps.length-1?`<div class="f-arr"><span class="f-pct">${steps[i+1].pct}</span><span class="f-sym">→</span></div>`:'';
+    return`<div class="f-step"><div class="f-box"><div class="f-num" style="color:${s.color}">${s.num}</div><div class="f-lbl">${s.lbl}</div></div>${arr}</div>`;
+  }).join('');
+}
+
+function calcMain(){
+  const ta=slv('c-ta','lc-ta'),tp=slv('c-tp','lc-tp'),tv=slv('c-tv','lc-tv');
+  const inv=sv('c-inv'),cpl=sv('c-cpl')||1,precio=sv('c-precio');
+  const r=calcR(inv,cpl,ta,tp,tv,precio);
+  renderFunnel('main-funnel',r,ta,tp,tv);
+  document.getElementById('main-metrics').innerHTML=`
+    <div class="metric green"><div class="m-lbl">Ingresos esperados</div><div class="m-val">${fmtUSD(r.ingresos)}</div><div class="m-sub">${fmt(r.ventas)} ventas</div></div>
+    <div class="metric purple"><div class="m-lbl">ROI campaña</div><div class="m-val">${r.roi}%</div></div>
+    <div class="metric"><div class="m-lbl">Ganancia neta</div><div class="m-val">${fmtUSD(r.ganancia)}</div></div>
+    <div class="metric"><div class="m-lbl">Costo por venta</div><div class="m-val">${fmtUSD(r.cpv)}</div></div>`;
+}
+
+function updateSlider(idx,field,val){
+  treatments[idx][field]=parseInt(val);
+  renderTx();
+}
+
+function addTx(){
+  treatments.push({id:txId++,name:'Tratamiento '+txId,inv:500,cpl:8,precio:300,ta:40,tp:70,tv:50});
+  renderTx();
+}
+
+function renderTx(){
+  document.getElementById('tx-list').innerHTML=treatments.map((tx,idx)=>{
+    const r=calcRT(tx);
+    const col=COLORS[idx%COLORS.length];
+    return`<div class="tx-item" style="border-left:3px solid ${col};margin-bottom:10px">
+      <div class="tx-header">
+        <input class="tx-name" value="${tx.name}" oninput="treatments[${idx}].name=this.value">
+        <button class="tx-del" onclick="treatments.splice(${idx},1);renderTx()">✕ quitar</button>
+      </div>
+      <div class="tx-fields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:10px">
+        <div class="field"><label>Inversión (USD)</label><input type="number" value="${tx.inv}" min="0" oninput="treatments[${idx}].inv=+this.value;renderTx()"></div>
+        <div class="field"><label>CPL (USD)</label><input type="number" value="${tx.cpl}" min="0.1" step="0.5" oninput="treatments[${idx}].cpl=+this.value;renderTx()"></div>
+        <div class="field"><label>Precio tratamiento (USD)</label><input type="number" value="${tx.precio}" min="0" oninput="treatments[${idx}].precio=+this.value;renderTx()"></div>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px">
+        <div style="font-size:10px;font-weight:500;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Tasas de conversión propias</div>
+        <div class="slider-row">
+          <label>Lead → Agenda</label>
+          <input type="range" min="1" max="100" value="${tx.ta}" step="1" oninput="treatments[${idx}].ta=+this.value;document.getElementById('sv-ta-${idx}').textContent=this.value+'%';renderTx()">
+          <span class="slider-val" id="sv-ta-${idx}">${tx.ta}%</span>
+        </div>
+        <div class="slider-row">
+          <label>Agenda → Se presenta</label>
+          <input type="range" min="1" max="100" value="${tx.tp}" step="1" oninput="treatments[${idx}].tp=+this.value;document.getElementById('sv-tp-${idx}').textContent=this.value+'%';renderTx()">
+          <span class="slider-val" id="sv-tp-${idx}">${tx.tp}%</span>
+        </div>
+        <div class="slider-row">
+          <label>Presentado → Venta</label>
+          <input type="range" min="1" max="100" value="${tx.tv}" step="1" oninput="treatments[${idx}].tv=+this.value;document.getElementById('sv-tv-${idx}').textContent=this.value+'%';renderTx()">
+          <span class="slider-val" id="sv-tv-${idx}">${tx.tv}%</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px;font-size:12px">
+        <span style="background:${col}22;color:${col};padding:3px 8px;border-radius:4px;font-weight:500">${fmt(r.leads)} leads</span>
+        <span style="color:var(--muted)">→ ${tx.ta}%</span>
+        <span style="background:var(--surface2);padding:3px 8px;border-radius:4px">${fmt(r.agendas)} agendas</span>
+        <span style="color:var(--muted)">→ ${tx.tp}%</span>
+        <span style="background:var(--surface2);padding:3px 8px;border-radius:4px">${fmt(r.pres)} presentes</span>
+        <span style="color:var(--muted)">→ ${tx.tv}%</span>
+        <span style="background:#E1F5EE;color:#085041;padding:3px 8px;border-radius:4px;font-weight:500">${fmt(r.ventas)} ventas</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding-top:10px;border-top:1px solid var(--border)">
+        <div class="metric"><div class="m-lbl">Leads</div><div class="m-val">${fmt(r.leads)}</div></div>
+        <div class="metric"><div class="m-lbl">Ventas</div><div class="m-val">${fmt(r.ventas)}</div></div>
+        <div class="metric green"><div class="m-lbl">Ingresos</div><div class="m-val">${fmtUSD(r.ingresos)}</div></div>
+        <div class="metric ${r.roi>=0?'green':'purple'}"><div class="m-lbl">ROI</div><div class="m-val">${r.roi}%</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const comb=document.getElementById('tx-combined');
+  if(treatments.length<2){comb.style.display='none';return;}
+  comb.style.display='';
+  const totInv=treatments.reduce((a,t)=>a+t.inv,0);
+  const totIng=treatments.reduce((a,t)=>a+calcRT(t).ingresos,0);
+  const totVentas=treatments.reduce((a,t)=>a+calcRT(t).ventas,0);
+  const totGan=totIng-totInv;
+  const totROI=totInv>0?Math.round(totGan/totInv*100):0;
+  const barSegs=treatments.map((t,i)=>{
+    const pct=totIng>0?Math.round(calcRT(t).ingresos/totIng*100):0;
+    return`<div class="combined-seg" style="width:${pct}%;background:${COLORS[i%COLORS.length]}"></div>`;
+  }).join('');
+  const legend=treatments.map((t,i)=>{
+    const pct=totIng>0?Math.round(calcRT(t).ingresos/totIng*100):0;
+    return`<div class="legend-item"><div class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></div>${t.name} — ${pct}%</div>`;
+  }).join('');
+  comb.innerHTML=`<div class="card">
+    <div class="card-title">Resultado combinado</div>
+    <div class="legend-row">${legend}</div>
+    <div class="combined-bar">${barSegs}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px">
+      <div class="metric"><div class="m-lbl">Inversión total</div><div class="m-val">${fmtUSD(totInv)}</div></div>
+      <div class="metric"><div class="m-lbl">Ventas totales</div><div class="m-val">${fmt(totVentas)}</div></div>
+      <div class="metric green"><div class="m-lbl">Ingresos totales</div><div class="m-val">${fmtUSD(totIng)}</div></div>
+      <div class="metric purple"><div class="m-lbl">ROI combinado</div><div class="m-val">${totROI}%</div></div>
+    </div>
+  </div>`;
+}
+
+function setMonths(n,btn){
+  projMonths=n;
+  document.querySelectorAll('#months-btns .mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProj();
+}
+
+function renderProj(){
+  const ta=slv('p-ta','lp-ta'),tp=slv('p-tp','lp-tp'),tv=slv('p-tv','lp-tv');
+  const inv0=sv('p-inv'),crec=sv('p-crec'),cpl=sv('p-cpl')||1,precio=sv('p-precio');
+  const meses=['Mes 1','Mes 2','Mes 3','Mes 4','Mes 5','Mes 6'];
+  const rows=[];
+  for(let i=0;i<projMonths;i++){
+    const inv=Math.round(inv0*Math.pow(1+crec/100,i));
+    const r=calcR(inv,cpl,ta,tp,tv,precio);
+    rows.push({mes:meses[i],inv,leads:r.leads,ventas:r.ventas,ingresos:r.ingresos,ganancia:r.ganancia,roi:r.roi});
+  }
+  const totals={inv:rows.reduce((a,r)=>a+r.inv,0),leads:rows.reduce((a,r)=>a+r.leads,0),ventas:rows.reduce((a,r)=>a+r.ventas,0),ingresos:rows.reduce((a,r)=>a+r.ingresos,0),ganancia:rows.reduce((a,r)=>a+r.ganancia,0)};
+
+  document.getElementById('proj-table').innerHTML=`
+    <thead><tr><th>Mes</th><th>Inversión</th><th>Leads</th><th>Ventas</th><th>Ingresos</th><th>Ganancia</th><th>ROI</th></tr></thead>
+    <tbody>
+      ${rows.map(r=>`<tr><td>${r.mes}</td><td>${fmtUSD(r.inv)}</td><td>${fmt(r.leads)}</td><td>${fmt(r.ventas)}</td><td class="pos">${fmtUSD(r.ingresos)}</td><td class="${r.ganancia>=0?'pos':'neg'}">${fmtUSD(r.ganancia)}</td><td class="${r.roi>=0?'pos':'neg'}">${r.roi}%</td></tr>`).join('')}
+      <tr><td>Total</td><td>${fmtUSD(totals.inv)}</td><td>${fmt(totals.leads)}</td><td>${fmt(totals.ventas)}</td><td class="pos">${fmtUSD(totals.ingresos)}</td><td class="${totals.ganancia>=0?'pos':'neg'}">${fmtUSD(totals.ganancia)}</td><td>—</td></tr>
+    </tbody>`;
+
+  document.getElementById('proj-legend').innerHTML=`
+    <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Ingresos</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#AFA9EC"></div>Inversión</div>`;
+
+  if(projChartInst){projChartInst.destroy();projChartInst=null;}
+  projChartInst=new Chart(document.getElementById('proj-chart'),{
+    type:'bar',
+    data:{
+      labels:rows.map(r=>r.mes),
+      datasets:[
+        {label:'Ingresos',data:rows.map(r=>r.ingresos),backgroundColor:'#1D9E75',borderRadius:4},
+        {label:'Inversión',data:rows.map(r=>r.inv),backgroundColor:'#AFA9EC',borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{autoSkip:false,font:{family:'DM Sans'}}},
+        y:{ticks:{callback:v=>'$'+Math.round(v).toLocaleString('es-MX'),font:{family:'DM Mono'}}}
+      }
+    }
+  });
+}
+
+function setInvMode(mode){
+  invMode=mode;
+  document.getElementById('inv-mode-v').classList.toggle('active',mode==='ventas');
+  document.getElementById('inv-mode-i').classList.toggle('active',mode==='ingresos');
+  document.getElementById('inv-field-ventas').style.display=mode==='ventas'?'':'none';
+  document.getElementById('inv-field-ingresos').style.display=mode==='ingresos'?'':'none';
+  calcInv();
+}
+
+function calcInv(){
+  slv('i-ta','li-ta');slv('i-tp','li-tp');slv('i-tv','li-tv');
+  const ta=parseInt(document.getElementById('i-ta').value),tp=parseInt(document.getElementById('i-tp').value),tv=parseInt(document.getElementById('i-tv').value);
+  const cpl=sv('i-cpl')||1,precio=sv('i-precio');
+  const convRate=(ta/100)*(tp/100)*(tv/100);
+  let ventasObj,ingresosObj;
+  if(invMode==='ventas'){
+    ventasObj=si('i-ventas');
+    ingresosObj=ventasObj*precio;
+  }else{
+    ingresosObj=sv('i-ingresos');
+    ventasObj=precio>0?Math.ceil(ingresosObj/precio):0;
+  }
+  const leadsNec=convRate>0?Math.ceil(ventasObj/convRate):0;
+  const invNec=Math.round(leadsNec*cpl);
+  const roi=invNec>0?Math.round((ingresosObj-invNec)/invNec*100):0;
+  document.getElementById('inv-result').innerHTML=`
+    <div class="inv-res purple"><div class="il">Inversión necesaria</div><div class="iv">${fmtUSD(invNec)}</div></div>
+    <div class="inv-res"><div class="il">Leads necesarios</div><div class="iv">${fmt(leadsNec)}</div></div>
+    <div class="inv-res"><div class="il">Ventas objetivo</div><div class="iv">${fmt(ventasObj)}</div></div>
+    <div class="inv-res green"><div class="il">Ingresos proyectados</div><div class="iv">${fmtUSD(ingresosObj)}</div></div>
+    <div class="inv-res"><div class="il">Ganancia neta</div><div class="iv">${fmtUSD(ingresosObj-invNec)}</div></div>
+    <div class="inv-res ${roi>=0?'green':''}"><div class="il">ROI estimado</div><div class="iv">${roi}%</div></div>`;
+}
+
+function setTab(t){
+  ['calc','tratamientos','proyeccion','inverso'].forEach(id=>document.getElementById('tab-'+id).style.display=t===id?'':'none');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['calc','tratamientos','proyeccion','inverso'][i]===t));
+  if(t==='tratamientos')renderTx();
+  if(t==='proyeccion')renderProj();
+  if(t==='inverso')calcInv();
+}
+
+calcMain();
+</script>
+</body>
+</html>
